@@ -1,17 +1,39 @@
 import React from "react";
+import { withRouter } from "react-router";
 
 class Register extends React.Component {
 
     state = {
         username: "",
         password: "",
-        admin: false
+        isAdmin: false
     }
 
+    changeHandler = this.changeHandler.bind(this);
+
     changeHandler(event){
-        
         const { name, type, value, checked } = event.target
         type === "checkbox" ? this.setState({ [name]: checked }) : this.setState({ [name]: value })
+    }
+
+    submitHandler = async (event) => {
+        event.preventDefault();
+        const register = await fetch("http://localhost:9000/auth/register", {
+            method: "POST",
+            credentials: "include",
+            body: JSON.stringify(this.state),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        const parsedRegister = await register.json();
+        console.log(parsedRegister, "response from register");
+
+        if(parsedRegister.status.message === "User Logged In"){
+            console.log("Logged In")
+
+            this.props.history.push("/employees")
+        }
     }
 
     render(){
@@ -40,8 +62,8 @@ class Register extends React.Component {
                     Admin:
                     <input
                         type="checkbox"
-                        name="admin"
-                        checked={this.state.admin}
+                        name="isAdmin"
+                        checked={this.state.isAdmin}
                         onChange={this.changeHandler}
                     />
                 </label>
@@ -54,4 +76,4 @@ class Register extends React.Component {
     }
 }
 
-export default Register;
+export default withRouter(Register);
